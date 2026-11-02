@@ -1,58 +1,7 @@
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Discover | Kolaar Connect</title>
-</head>
-<body>
-    <h1>Discover Users</h1>
-
-    <a href="/feed">Feed</a> |
-    <a href="/profile">My Profile</a> |
-    <a href="/recommendations">Recommendations</a>
-
-    <hr>
-
-    <form action="/search" method="GET">
-        <input name="q" value="{{ query }}"
-               placeholder="Search users..." required>
-        <button type="submit">Search</button>
-    </form>
-
-    {% if users %}
-        <h2>Search Results</h2>
-        {% for user in users %}
-            <p>
-                <a href="/profile/{{ user.username }}">
-                    {{ user.name }} (@{{ user.username }})
-                </a>
-            </p>
-        {% endfor %}
-    {% endif %}
-
-    {% if recommendations %}
-        <h2>People You May Know</h2>
-        {% for user in recommendations %}
-            <p>
-                <a href="/profile/{{ user.username }}">
-                    {{ user.name }} (@{{ user.username }})
-                </a>
-                — {{ user.common }} mutual connections
-            </p>
-        {% endfor %}
-    {% endif %}
-
-    {% if target %}
-        <h2>Mutual Connections with @{{ target }}</h2>
-        {% for user in mutuals %}
-            <p>
-                <a href="/profile/{{ user.username }}">
-                    {{ user.name }} (@{{ user.username }})
-                </a>
-            </p>
-        {% else %}
-            <p>No mutual connections found.</p>
-        {% endfor %}
-    {% endif %}
-</body>
-</html>
+{% extends "base.html" %}{% block title %}Discover · Kolaar{% endblock %}
+{% block content %}<div class="eyebrow">Expand your circle</div><h1 class="page-title">Discover people</h1>
+<div class="card"><form action="{{ url_for('discovery.search_users') }}" method="GET" class="row"><input name="q" value="{{ query or '' }}" placeholder="Search names or usernames..." required><button>Search</button></form></div>
+{% if users %}<div class="card"><h2>Search results</h2>{% for user in users %}<div class="list-item"><div class="row"><div class="avatar">{{ user.name[:1]|upper }}</div><div><a class="user-name" href="{{ url_for('profile.profile',username=user.username) }}">{{ user.name }}</a><div class="handle">@{{ user.username }}</div></div></div><a class="btn secondary" href="{{ url_for('profile.profile',username=user.username) }}">View</a></div>{% endfor %}</div>{% endif %}
+{% if recommendations %}<div class="card"><h2>People you may know</h2>{% for user in recommendations %}<div class="list-item"><div><a class="user-name" href="{{ url_for('profile.profile',username=user.username) }}">{{ user.name }}</a><div class="handle">@{{ user.username }} · {{ user.common }} mutual connections</div></div><a class="btn secondary" href="{{ url_for('profile.profile',username=user.username) }}">View</a></div>{% endfor %}</div>{% endif %}
+{% if target %}<div class="card"><h2>Mutual connections with @{{ target }}</h2>{% for user in mutuals %}<div class="list-item"><a href="{{ url_for('profile.profile',username=user.username) }}">{{ user.name }} (@{{ user.username }})</a></div>{% else %}<p class="subtle">No mutual connections found.</p>{% endfor %}</div>{% endif %}
+{% if not users and not recommendations and not target %}<div class="card empty">Search for people or explore recommendations.</div>{% endif %}{% endblock %}

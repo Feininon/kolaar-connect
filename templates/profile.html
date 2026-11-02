@@ -1,38 +1,14 @@
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ user.username }} | Kolaar Connect</title>
-</head>
-<body>
-    <h1>{{ user.name }}</h1>
-    <p>@{{ user.username }}</p>
-    <p>{{ user.bio or "No bio yet." }}</p>
-
-    <p>Followers: {{ user.followers }}</p>
-    <p>Following: {{ user.following }}</p>
-
-    {% if user.username == current_user.username %}
-        <a href="{{ url_for('profile.edit_profile') }}">
-            Edit Profile
-        </a>
-    {% else %}
-        {% if is_following %}
-            <form method="POST"
-                  action="{{ url_for('profile.unfollow_user',
-                                   username=user.username) }}">
-                <button type="submit">Unfollow</button>
-            </form>
-        {% else %}
-            <form method="POST"
-                  action="{{ url_for('profile.follow_user',
-                                   username=user.username) }}">
-                <button type="submit">Follow</button>
-            </form>
-        {% endif %}
-    {% endif %}
-
-    <br>
-    <a href="/">Home</a>
-</body>
-</html>
+{% extends "base.html" %}{% block title %}@{{ user.username }} · Kolaar{% endblock %}
+{% block content %}
+<div class="card"><div class="row"><div class="avatar large">{{ user.name[:1]|upper if user.name else user.username[:1]|upper }}</div><div><div class="eyebrow">Member profile</div><h1 class="page-title" style="margin:5px 0">{{ user.name or user.username }}</h1><div class="handle">@{{ user.username }}</div></div></div>
+<p style="line-height:1.7">{{ user.bio or "This person hasn't added a bio yet." }}</p>
+<div class="stat-grid"><div class="stat"><strong>{{ user.posts }}</strong><span>Posts</span></div><div class="stat"><strong>{{ user.followers }}</strong><span>Followers</span></div><div class="stat"><strong>{{ user.following }}</strong><span>Following</span></div></div>
+<div class="row">
+{% if user.username == current_user.username %}<a class="btn" href="{{ url_for('profile.edit_profile') }}">Edit profile</a>
+{% elif is_following %}<form method="POST" action="{{ url_for('profile.unfollow',username=user.username) }}"><button class="secondary">Following · Unfollow</button></form>
+{% else %}<form method="POST" action="{{ url_for('profile.follow',username=user.username) }}"><button>＋ Follow</button></form>{% endif %}
+{% if user.username != current_user.username %}<a class="btn secondary" href="{{ url_for('discovery.mutual_connections',username=user.username) }}">Mutual connections</a>{% endif %}
+</div></div>
+<h2 class="page-title">Posts</h2>
+{% for post in posts %}<article class="card"><div class="subtle">{{ post.created_at }}</div><div class="post-content">{{ post.content }}</div><div class="subtle">♥ {{ post.likes }} · ◌ {{ post.comments }}</div></article>{% else %}<div class="card empty">No posts yet.</div>{% endfor %}
+{% endblock %}

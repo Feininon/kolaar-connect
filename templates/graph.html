@@ -1,74 +1,236 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Social Graph | Kolaar Connect</title>
+{% extends "base.html" %}
+{% block title %}Social graph · Kolaar{% endblock %}
 
-    <script src="https://unpkg.com/cytoscape@3.30.0/dist/cytoscape.min.js"></script>
+{% block head %}
+<script src="https://unpkg.com/cytoscape@3.30.0/dist/cytoscape.min.js"></script>
 
-    <style>
-        #cy {
-            width: 100%;
-            height: 600px;
-            border: 1px solid #ccc;
+<style>
+    .graph-container {
+        position: relative;
+        width: 100%;
+        height: 650px;
+        min-height: 500px;
+        margin-top: 20px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #0b1120;
+        border: 1px solid #253149;
+    }
+
+    #cy {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    #graph-status {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 14px;
+        pointer-events: none;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .graph-legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .legend-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #7c8cff;
+        border-radius: 50%;
+        margin-right: 7px;
+    }
+
+    @media (max-width: 768px) {
+        .graph-container {
+            height: 500px;
         }
-    </style>
-</head>
-<body>
-    <h1>Social Network Graph</h1>
+    }
+</style>
+{% endblock %}
 
-    <a href="/feed">Feed</a> |
-    <a href="/profile">My Profile</a> |
-    <a href="/search">Search</a>
+{% block content %}
 
-    <div id="cy"></div>
+<div class="eyebrow">Your connections, visualized</div>
 
-    <script>
-        fetch("/api/graph")
-            .then(response => response.json())
-            .then(data => {
-                const cy = cytoscape({
-                    container: document.getElementById("cy"),
-                    elements: [...data.nodes, ...data.edges],
+<h1 class="page-title">Social graph</h1>
 
-                    style: [
-                        {
-                            selector: "node",
-                            style: {
-                                "label": "data(label)",
-                                "background-color": "#2563eb",
-                                "color": "#ffffff",
-                                "text-valign": "center",
-                                "text-halign": "center",
-                                "width": 60,
-                                "height": 60,
-                                "font-size": 12
-                            }
-                        },
-                        {
-                            selector: "edge",
-                            style: {
-                                "width": 2,
-                                "line-color": "#94a3b8",
-                                "target-arrow-color": "#94a3b8",
-                                "target-arrow-shape": "triangle",
-                                "curve-style": "bezier",
-                                "arrow-scale": 1.2
-                            }
-                        }
-                    ],
+<div class="card">
 
-                    layout: {
-                        name: "cose",
-                        animate: true
+    <p class="subtle">
+        Explore your social network. Click a node to visit that profile.
+    </p>
+
+    <div class="graph-container">
+        <div id="cy"></div>
+        <div id="graph-status">Loading your social graph...</div>
+    </div>
+
+    <div class="graph-legend">
+        <span><span class="legend-dot"></span>User</span>
+        <span>Click a node to visit their profile</span>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+
+    const container = document.getElementById("cy");
+    const status = document.getElementById("graph-status");
+
+    function showStatus(message) {
+        status.style.display = "flex";
+        status.textContent = message;
+    }
+
+    try {
+
+        if (typeof cytoscape === "undefined") {
+            throw new Error("Cytoscape failed to load. Check your internet connection.");
+        }
+
+        const response = await fetch(
+            "{{ url_for('graph.graph_data') }}",
+            {
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Graph API returned HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
+            throw new Error("Invalid graph data received from Flask.");
+        }
+
+        if (data.nodes.length === 0) {
+            showStatus("No users found in your social graph yet.");
+            return;
+        }
+
+        status.style.display = "none";
+
+        const cy = cytoscape({
+
+            container: container,
+
+            elements: {
+                nodes: data.nodes,
+                edges: data.edges
+            },
+
+            style: [
+
+                {
+                    selector: "node",
+                    style: {
+                        "label": "data(label)",
+                        "background-color": "#7c8cff",
+                        "color": "#e9eefb",
+                        "text-valign": "center",
+                        "text-halign": "center",
+                        "text-wrap": "wrap",
+                        "text-max-width": "90px",
+                        "width": 65,
+                        "height": 65,
+                        "font-size": 12,
+                        "font-weight": 600,
+                        "border-width": 2,
+                        "border-color": "#aab7ff",
+                        "text-outline-width": 2,
+                        "text-outline-color": "#0b1120"
                     }
-                });
+                },
 
-                cy.on("tap", "node", function(event) {
-                    const username = event.target.data("username");
-                    window.location.href = "/profile/" + encodeURIComponent(username);
-                });
-            });
-    </script>
-</body>
-</html>
+                {
+                    selector: "edge",
+                    style: {
+                        "width": 2,
+                        "line-color": "#3b4d70",
+                        "target-arrow-color": "#5de0c2",
+                        "target-arrow-shape": "triangle",
+                        "curve-style": "bezier",
+                        "opacity": 0.8
+                    }
+                },
+
+                {
+                    selector: "node:selected",
+                    style: {
+                        "background-color": "#5de0c2",
+                        "border-color": "#ffffff",
+                        "border-width": 4
+                    }
+                }
+
+            ],
+
+            layout: {
+                name: "cose",
+                animate: true,
+                animationDuration: 700,
+                fit: true,
+                padding: 50,
+                nodeRepulsion: 8000,
+                idealEdgeLength: 150,
+                gravity: 0.25
+            },
+
+            minZoom: 0.3,
+            maxZoom: 3,
+            wheelSensitivity: 0.2
+
+        });
+
+        cy.on("tap", "node", function (event) {
+
+            const username = event.target.data("username");
+
+            if (username) {
+                window.location.href =
+                    "/profile/" + encodeURIComponent(username);
+            }
+
+        });
+
+        cy.on("layoutstop", function () {
+            cy.fit(50);
+        });
+
+        window.addEventListener("resize", function () {
+            cy.resize();
+            cy.fit(50);
+        });
+
+    } catch (error) {
+
+        console.error("Social graph error:", error);
+
+        showStatus("Unable to render graph: " + error.message);
+
+    }
+
+});
+</script>
+
+{% endblock %}

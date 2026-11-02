@@ -1,75 +1,15 @@
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Kolaar Connect Feed</title>
-</head>
-<body>
-    <h1>Kolaar Connect</h1>
-    <h2>Home Feed</h2>
-
-    <a href="/">Home</a> |
-    <a href="/profile">My Profile</a> |
-    <a href="/logout">Logout</a>
-
-    <hr>
-
-    <h3>Create Post</h3>
-    <form method="POST" action="/post/create">
-        <textarea name="content"
-                  placeholder="What's on your mind?"
-                  required></textarea>
-        <br>
-        <button type="submit">Publish</button>
-    </form>
-
-    <hr>
-
-    {% for post in posts %}
-        <article>
-            <h3>
-                <a href="/profile/{{ post.username }}">
-                    {{ post.name }} (@{{ post.username }})
-                </a>
-            </h3>
-
-            <p>{{ post.content }}</p>
-            <small>{{ post.created_at }}</small>
-
-            <p>
-                ❤️ {{ post.likes }} likes |
-                💬 {{ post.comments }} comments
-            </p>
-
-            <form method="POST"
-                  action="/post/{{ post.post_id }}/like">
-                <button type="submit">Like</button>
-            </form>
-
-            <form method="POST"
-                  action="/post/{{ post.post_id }}/unlike">
-                <button type="submit">Unlike</button>
-            </form>
-
-            <form method="POST"
-                  action="/post/{{ post.post_id }}/comment">
-                <input name="content"
-                       placeholder="Write a comment..."
-                       required>
-                <button type="submit">Comment</button>
-            </form>
-
-            {% if post.username == current_user.username %}
-                <form method="POST"
-                      action="/post/{{ post.post_id }}/delete">
-                    <button type="submit">Delete Post</button>
-                </form>
-            {% endif %}
-        </article>
-
-        <hr>
-    {% else %}
-        <p>No posts yet. Follow users or publish your first post!</p>
-    {% endfor %}
-</body>
-</html>
+{% extends "base.html" %}{% block title %}Home feed · Kolaar{% endblock %}
+{% block content %}
+<div class="between"><div><div class="eyebrow">Your community</div><h1 class="page-title">Home feed</h1></div><span class="pill">Live network</span></div>
+<div class="card"><form method="POST" action="{{ url_for('posts.create_post') }}"><div class="row"><div class="avatar">{{ current_user.name[:1]|upper }}</div><div style="flex:1"><textarea name="content" placeholder="What's happening in your world? Use #hashtags" required></textarea></div></div><div class="between" style="margin-top:12px"><span class="subtle">Share a thought with your network</span><button type="submit">Publish ↗</button></div></form></div>
+{% for post in posts %}
+<article class="card">
+<div class="row"><div class="avatar">{{ post.name[:1]|upper if post.name else post.username[:1]|upper }}</div><div><a class="user-name" href="{{ url_for('profile.profile', username=post.username) }}">{{ post.name or post.username }}</a><div class="handle">@{{ post.username }} · {{ post.created_at }}</div></div><div style="margin-left:auto">{% if post.username == current_user.username %}<form method="POST" action="{{ url_for('posts.delete_post',post_id=post.post_id) }}"><button class="danger" type="submit">Delete</button></form>{% endif %}</div></div>
+<div class="post-content">{{ post.content }}</div>
+<div class="subtle">♥ {{ post.likes }} likes · ◌ {{ post.comments }} comments</div>
+<div class="post-actions"><form method="POST" action="{{ url_for('posts.like_post',post_id=post.post_id) }}"><button class="secondary" type="submit">♥ Like</button></form><form method="POST" action="{{ url_for('posts.unlike_post',post_id=post.post_id) }}"><button class="secondary" type="submit">Unlike</button></form></div>
+{% if post.comment_list %}<div class="comment-list">{% for comment in post.comment_list %}{% if comment.content %}<div class="comment"><strong>@{{ comment.username }}</strong> {{ comment.content }}</div>{% endif %}{% endfor %}</div>{% endif %}
+<form method="POST" action="{{ url_for('posts.comment_post',post_id=post.post_id) }}" class="row" style="margin-top:13px"><input name="content" placeholder="Add a comment..." required><button type="submit">Send</button></form>
+</article>
+{% else %}<div class="card empty"><h3>Your feed is quiet.</h3><p>Publish a post or discover people to follow.</p><a class="btn" href="{{ url_for('discovery.search_users') }}">Discover people</a></div>{% endfor %}
+{% endblock %}
