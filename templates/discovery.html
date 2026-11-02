@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discover | Kolaar Connect</title>
+</head>
+<body>
+    <h1>Discover Users</h1>
+
+    <a href="/feed">Feed</a> |
+    <a href="/profile">My Profile</a> |
+    <a href="/recommendations">Recommendations</a>
+
+    <hr>
+
+    <form action="/search" method="GET">
+        <input name="q" value="{{ query }}"
+               placeholder="Search users..." required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if users %}
+        <h2>Search Results</h2>
+        {% for user in users %}
+            <p>
+                <a href="/profile/{{ user.username }}">
+                    {{ user.name }} (@{{ user.username }})
+                </a>
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    {% if recommendations %}
+        <h2>People You May Know</h2>
+        {% for user in recommendations %}
+            <p>
+                <a href="/profile/{{ user.username }}">
+                    {{ user.name }} (@{{ user.username }})
+                </a>
+                — {{ user.common }} mutual connections
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    {% if target %}
+        <h2>Mutual Connections with @{{ target }}</h2>
+        {% for user in mutuals %}
+            <p>
+                <a href="/profile/{{ user.username }}">
+                    {{ user.name }} (@{{ user.username }})
+                </a>
+            </p>
+        {% else %}
+            <p>No mutual connections found.</p>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

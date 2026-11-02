@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ user.username }} | Kolaar Connect</title>
+</head>
+<body>
+    <h1>{{ user.name }}</h1>
+    <p>@{{ user.username }}</p>
+    <p>{{ user.bio or "No bio yet." }}</p>
+
+    <p>Followers: {{ user.followers }}</p>
+    <p>Following: {{ user.following }}</p>
+
+    {% if user.username == current_user.username %}
+        <a href="{{ url_for('profile.edit_profile') }}">
+            Edit Profile
+        </a>
+    {% else %}
+        {% if is_following %}
+            <form method="POST"
+                  action="{{ url_for('profile.unfollow_user',
+                                   username=user.username) }}">
+                <button type="submit">Unfollow</button>
+            </form>
+        {% else %}
+            <form method="POST"
+                  action="{{ url_for('profile.follow_user',
+                                   username=user.username) }}">
+                <button type="submit">Follow</button>
+            </form>
+        {% endif %}
+    {% endif %}
+
+    <br>
+    <a href="/">Home</a>
+</body>
+</html>

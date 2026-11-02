@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hashtags | Kolaar Connect</title>
+</head>
+<body>
+
+    <h1>Kolaar Connect - Hashtags</h1>
+
+    <nav>
+        <a href="/feed">Feed</a> |
+        <a href="/hashtags/trending">Trending Hashtags</a> |
+        <a href="/profile">My Profile</a>
+    </nav>
+
+    <hr>
+
+    <!-- Hashtag Search -->
+    <form action="/hashtags/search" method="GET">
+        <input
+            type="text"
+            name="q"
+            placeholder="Search hashtags..."
+            required
+        >
+        <button type="submit">Search</button>
+    </form>
+
+    <hr>
+
+    <!-- Individual Hashtag Posts -->
+    {% if tag %}
+
+        <h2>Posts tagged #{{ tag }}</h2>
+
+        {% if posts %}
+
+            {% for post in posts %}
+
+                <article>
+                    <p>
+                        <strong>@{{ post.username }}</strong>
+                    </p>
+
+                    <p>{{ post.content }}</p>
+
+                    <p>
+                        Likes: {{ post.likes }}
+                        |
+                        Comments: {{ post.comments }}
+                    </p>
+                </article>
+
+                <hr>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No posts found for this hashtag.</p>
+
+        {% endif %}
+
+    {% else %}
+
+        <!-- Trending or Search Results -->
+        <h2>Hashtag Results</h2>
+
+        {% if hashtags %}
+
+            {% for item in hashtags %}
+
+                <p>
+                    <a href="/hashtag/{{ item.hashtag }}">
+                        #{{ item.hashtag }}
+                    </a>
+
+                    {% if item.posts is defined %}
+                        ({{ item.posts }} posts)
+                    {% endif %}
+                </p>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No hashtags found.</p>
+
+        {% endif %}
+
+    {% endif %}
+
+</body>
+</html>

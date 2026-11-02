@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graph Analytics | Kolaar Connect</title>
+</head>
+<body>
+    <h1>Kolaar Connect Analytics</h1>
+
+    <a href="/feed">Feed</a> |
+    <a href="/graph">Social Graph</a>
+
+    <hr>
+
+    <h2>Shortest Path</h2>
+
+    <form method="POST" action="/shortest-path">
+        <input name="username"
+               placeholder="Target username"
+               required>
+        <button type="submit">Find Path</button>
+    </form>
+
+    {% if path %}
+        <p>Connection path:</p>
+        <p>{{ path | join(" → ") }}</p>
+    {% elif target %}
+        <p>No path found between you and {{ target }}.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Degree Centrality</h2>
+    <a href="/degree-centrality">Calculate Connections</a>
+
+    {% if centrality %}
+        <ol>
+        {% for user in centrality %}
+            <li>
+                {{ user.username }} —
+                {{ user.connections }} connections
+            </li>
+        {% endfor %}
+        </ol>
+    {% endif %}
+
+    <hr>
+
+    <h2>Trending Posts</h2>
+    <a href="/trending">Calculate Trending Posts</a>
+
+    {% if trending %}
+        <ol>
+        {% for post in trending %}
+            <li>
+                @{{ post.username }}:
+                {{ post.content }}
+                <br>
+                Likes: {{ post.likes }},
+                Comments: {{ post.comments }},
+                Score: {{ post.score }}
+            </li>
+        {% endfor %}
+        </ol>
+    {% endif %}
+    <hr>
+<h2>PageRank — Influential Users</h2>
+
+<a href="/pagerank">Calculate PageRank</a>
+
+{% if pagerank %}
+    <ol>
+    {% for user in pagerank %}
+        <li>
+            {{ user.username }} —
+            {{ "%.4f"|format(user.score) }}
+        </li>
+    {% endfor %}
+    </ol>
+{% endif %}
+
+</body>
+</html>

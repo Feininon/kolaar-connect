@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile | Kolaar Connect</title>
+</head>
+<body>
+    <h2>Edit Profile</h2>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+        <input name="name"
+               value="{{ user.name }}"
+               placeholder="Name"
+               required><br><br>
+
+        <textarea name="bio"
+                  placeholder="Write your bio">{{ user.bio or "" }}</textarea>
+        <br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+</body>
+</html>

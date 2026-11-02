@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kolaar Connect Feed</title>
+</head>
+<body>
+    <h1>Kolaar Connect</h1>
+    <h2>Home Feed</h2>
+
+    <a href="/">Home</a> |
+    <a href="/profile">My Profile</a> |
+    <a href="/logout">Logout</a>
+
+    <hr>
+
+    <h3>Create Post</h3>
+    <form method="POST" action="/post/create">
+        <textarea name="content"
+                  placeholder="What's on your mind?"
+                  required></textarea>
+        <br>
+        <button type="submit">Publish</button>
+    </form>
+
+    <hr>
+
+    {% for post in posts %}
+        <article>
+            <h3>
+                <a href="/profile/{{ post.username }}">
+                    {{ post.name }} (@{{ post.username }})
+                </a>
+            </h3>
+
+            <p>{{ post.content }}</p>
+            <small>{{ post.created_at }}</small>
+
+            <p>
+                ❤️ {{ post.likes }} likes |
+                💬 {{ post.comments }} comments
+            </p>
+
+            <form method="POST"
+                  action="/post/{{ post.post_id }}/like">
+                <button type="submit">Like</button>
+            </form>
+
+            <form method="POST"
+                  action="/post/{{ post.post_id }}/unlike">
+                <button type="submit">Unlike</button>
+            </form>
+
+            <form method="POST"
+                  action="/post/{{ post.post_id }}/comment">
+                <input name="content"
+                       placeholder="Write a comment..."
+                       required>
+                <button type="submit">Comment</button>
+            </form>
+
+            {% if post.username == current_user.username %}
+                <form method="POST"
+                      action="/post/{{ post.post_id }}/delete">
+                    <button type="submit">Delete Post</button>
+                </form>
+            {% endif %}
+        </article>
+
+        <hr>
+    {% else %}
+        <p>No posts yet. Follow users or publish your first post!</p>
+    {% endfor %}
+</body>
+</html>
